@@ -1,0 +1,30 @@
+# Ubib configuration template
+# ===========================
+# This is a BLANK reference copy of the config structure. Ubib does NOT read it
+# directly and does NOT create your real config automatically.
+#
+# Create your real config from Python (writes ~/.ubib/config.toml):
+#
+#     import ubib
+#     ubib.define_config(
+#         data_dir=r"D:/economic_data",
+#         api_keys={"fred": "...", "bls": "..."},
+#         credentials={"bcch_user": "...", "bcch_password": "..."},
+#     )
+#
+# Or reuse the legacy free public keys:
+#     ubib.define_config(data_dir=r"D:/economic_data", api_keys=ubib.KNOWN_PUBLIC_KEYS)
+
+data_dir = ""
+
+[api_keys]
+fred = ""
+bls = ""
+bea = ""
+inegi = ""
+banxico = ""
+us_census = ""
+
+[credentials]
+bcch_user = ""
+bcch_password = ""

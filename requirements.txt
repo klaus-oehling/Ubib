@@ -1,0 +1,13 @@
+# Core runtime dependencies (see pyproject.toml for the authoritative list).
+pandas>=2.0
+numpy>=1.23
+requests>=2.28
+pyarrow>=12.0
+openpyxl>=3.1
+beautifulsoup4>=4.11
+lxml>=4.9
+python-dateutil>=2.8
+tomli>=2.0; python_version < "3.11"
+
+# Optional, install only if you use these sources:
+#   pip install "xbbg>=0.7" narwhals      # Bloomberg

@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ubib"
+version = "1.0.0"
+description = "A unified, systematic interface for importing public (and Bloomberg) economic data."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "PolyForm Noncommercial 1.0.0" }
+authors = [
+    { name = "Klaus Colletti Oehling" },
+]
+keywords = ["economics", "macro", "data", "timeseries", "fred", "sgs", "sidra", "bloomberg"]
+
+dependencies = [
+    "pandas>=2.0",
+    "numpy>=1.23",
+    "requests>=2.28",
+    "pyarrow>=12.0",        # parquet engine
+    "openpyxl>=3.1",        # read the metadata workbook
+    "beautifulsoup4>=4.11",
+    "lxml>=4.9",
+    "python-dateutil>=2.8",
+    "tomli>=2.0; python_version < '3.11'",
+]
+
+[project.optional-dependencies]
+# Heavy / source-specific extras. Install only what you use.
+bloomberg = ["xbbg>=0.7", "narwhals>=1.0"]
+extras = ["eurostatapiclient>=1.0", "ecbdata>=0.2", "sie-banxico>=1.0", "tqdm>=4.65"]
+dev = ["pytest>=7.0", "ruff>=0.1", "build>=1.0"]
+
+[project.urls]
+Homepage = "https://github.com/klaus-oehling/Ubib"
+Repository = "https://github.com/klaus-oehling/Ubib"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+ubib = ["data/*.xlsx", "data/*.toml"]
+
+[tool.ruff]
+line-length = 99
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP", "B"]
