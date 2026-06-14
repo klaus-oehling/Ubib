@@ -13,9 +13,22 @@ for licensed users. One catalog, one function, one storage format.
 
 ## Install
 
+Install straight from GitHub:
+
 ```bash
-pip install -e C:\Users\oehli\Ubib                 # core (all public sources)
-pip install -e "C:\Users\oehli\Ubib[bloomberg]"    # + Bloomberg (needs a terminal)
+# core (all public sources)
+pip install git+https://github.com/klaus-oehling/Ubib.git
+
+# with Bloomberg support (needs a terminal; see below)
+pip install "ubib[bloomberg] @ git+https://github.com/klaus-oehling/Ubib.git"
+```
+
+For development, clone and install in editable mode:
+
+```bash
+git clone https://github.com/klaus-oehling/Ubib.git
+cd Ubib
+pip install -e .
 ```
 
 `pip install` writes nothing to your home folder and stores no keys.
@@ -29,7 +42,7 @@ import ubib
 
 # 1) Configure once (writes ~/.ubib/config.toml)
 ubib.define_config(
-    data_dir=r"C:\Users\oehli\ubib_data",
+    data_dir="~/ubib_data",
     api_keys={"fred": "YOUR_FRED_KEY", "bls": "YOUR_BLS_KEY"},
 )
 
@@ -58,7 +71,7 @@ Creates (or overwrites) `~/.ubib/config.toml`. Returns nothing.
 
 ```python
 ubib.define_config(
-    data_dir=r"C:\Users\oehli\ubib_data",
+    data_dir="~/ubib_data",
     api_keys={"fred": "...", "bls": "...", "bea": "..."},
     credentials={"bcch_user": "you@example.com", "bcch_password": "..."},
 )
@@ -113,7 +126,7 @@ keeping the last observation in each period. Applied on **every** call, includin
 cached reads, so you can re-aggregate without re-downloading:
 
 ```python
-ubib.load("US CPI", frequency="Q")   # cached monthly data -> quarterly
+ubib.load("10YTEASURY", frequency="Q")   # cached monthly data -> quarterly
 ```
 
 **`format_index`** (`bool`, default `True`)
@@ -189,9 +202,8 @@ catalog.reload()
 
 ## Bloomberg
 
-Bloomberg series are loaded exactly like any other — `ubib.load("IBOV Index",
-update=True)` — but require a machine with a Bloomberg terminal plus the `xbbg`
-and `blpapi` packages (`pip install -e ".[bloomberg]"`, then install `blpapi`
+Bloomberg series are loaded exactly like any other — `ubib.load("ABSVERT BZ Equity Rendimento", update=True)` — but require a machine with a Bloomberg terminal plus the `xbbg`
+and `blpapi` packages (install the `[bloomberg]` extra, then install `blpapi`
 from Bloomberg's index). The `code` for these series is `"TICKER,FIELD"`.
 
 ---
