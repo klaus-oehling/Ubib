@@ -23,7 +23,7 @@ class SGS(Source):
     def fetch(self, spec, config):
         code = str(spec.code).split(";")[0].strip()
         frames = []
-        start_year = 1990
+        start_year = 1920  # match full BCB history (some series start in the 1980s)
         end_year = dt.date.today().year + 1
         for year in range(start_year, end_year, 10):
             url = (
