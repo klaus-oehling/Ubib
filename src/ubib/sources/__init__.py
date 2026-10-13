@@ -26,6 +26,7 @@ from .imf import IMF
 from .ine_spain import INESpain
 from .inegi import INEGI
 from .ipea import IPEA
+from .microdados_pnad import MicrodadosPNAD
 from .olinda import Olinda
 from .ons import ONS
 from .sgs import SGS
@@ -39,8 +40,8 @@ from .worldbank import WorldBank
 
 _SOURCE_CLASSES: tuple[type[Source], ...] = (
     ABS, ANAC, ANP, Banxico, BCCh, BEA, Bloomberg, BLS, CAGED, Cielo, ComexStat,
-    ECB, Eurostat, FRED, IMF, INESpain, INEGI, IPEA, Olinda, ONS, SGS, SIDRA,
-    StatCan, TesouroDireto, TesouroRMD, TesouroRTN, USCensus, WorldBank,
+    ECB, Eurostat, FRED, IMF, INESpain, INEGI, IPEA, MicrodadosPNAD, Olinda, ONS,
+    SGS, SIDRA, StatCan, TesouroDireto, TesouroRMD, TesouroRTN, USCensus, WorldBank,
 )
 
 #: Mapping of source id -> adapter instance.

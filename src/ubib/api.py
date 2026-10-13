@@ -18,7 +18,7 @@ from collections.abc import Iterable
 
 import pandas as pd
 
-from . import catalog, storage
+from . import catalog, storage, _console
 from .config import Config, get_config
 from .sources import available_sources, get_source
 from .transform.frequency import to_period_end
@@ -43,15 +43,20 @@ def _format(series: pd.Series, *, frequency: str | None, format_index: bool,
 
 def _fetch_one(name: str, *, update: bool, frequency: str | None,
                format_index: bool, config: Config) -> pd.Series:
-    """Return a single series, downloading and caching it if needed."""
+    """Return a single series: downloaded when ``update``, else read from cache.
+
+    ``update`` decides the source of the data on its own. A series that is not
+    cached yet raises rather than being fetched silently, so that ``update=False``
+    always means "no network" -- the same contract :func:`ubib.microdata` follows.
+    """
     spec = catalog.get(name)  # raises KeyError immediately for unknown names
 
-    if update or not storage.exists(spec.source, name, config):
+    if update:
         raw = get_source(spec.source).fetch(spec, config)
         base = storage.normalize(raw, name)
         storage.save(base, spec.source, name, config)
     else:
-        base = storage.load(spec.source, name, config)
+        base = storage.load(spec.source, name, config)  # raises if not cached
 
     return _format(base, frequency=frequency, format_index=format_index,
                    declared=spec.frequency)
@@ -84,6 +89,7 @@ def load(
     update: bool = False,
     frequency: str | None = None,
     format_index: bool = True,
+    verbose: bool = True,
     config: Config | None = None,
 ):
     """Load one or more series.
@@ -106,13 +112,18 @@ def load(
 
     Returns
     -------
-    A :class:`pandas.Series` for a single series, otherwise a
-    :class:`pandas.DataFrame`.
+    A :class:`pandas.Series` for a single series. For several series, a
+    :class:`pandas.DataFrame` with one column per series -- unless at least one
+    entry is itself a wide frame (e.g. a ComexStat breakdown), in which case a
+    ``dict`` mapping each label to its Series/DataFrame is returned, since such
+    entries cannot be concatenated into a single flat table.
     """
     if not isinstance(update, bool):
         raise TypeError(f"'update' must be True or False, got {update!r}")
     if not isinstance(format_index, bool):
         raise TypeError(f"'format_index' must be True or False, got {format_index!r}")
+    if not isinstance(verbose, bool):
+        raise TypeError(f"'verbose' must be True or False, got {verbose!r}")
     if frequency is not None and (
         not isinstance(frequency, str) or frequency.upper() not in {"D", "M", "Q", "A"}
     ):
@@ -126,19 +137,39 @@ def load(
     labels = list(series.keys()) if isinstance(series, dict) else names
 
     if kind == "single":
-        return _fetch_one(names[0], update=update, frequency=frequency,
-                          format_index=format_index, config=config)
+        name = names[0]
+        try:
+            series = _fetch_one(name, update=update, frequency=frequency,
+                                format_index=format_index, config=config)
+        except Exception as exc:  # noqa: BLE001
+            if verbose:
+                _console.fail(f"{name}: {exc}")
+            raise
+        if verbose:
+            _console.ok(f"{'downloaded' if update else 'loaded'} {name}")
+        return series
 
-    collected: dict[str, pd.Series] = {}
-    for label, name in zip(labels, names):
+    collected: dict[str, pd.Series | pd.DataFrame] = {}
+    desc = "Downloading" if update else "Loading"
+    for label, name in _console.progress(list(zip(labels, names)), desc=desc):
         try:
             collected[label] = _fetch_one(name, update=update, frequency=frequency,
                                          format_index=format_index, config=config)
+            if verbose:
+                _console.ok(f"{'downloaded' if update else 'loaded'} {name}")
         except (FileNotFoundError, ValueError, RuntimeError) as exc:
-            log.warning("skipping '%s': %s", name, exc)
+            if verbose:
+                _console.fail(f"{name}: {exc}")
 
     if not collected:
         return pd.DataFrame()
+
+    # Entradas que já são tabelas (recortes do ComexStat, por exemplo) não cabem
+    # em uma única tabela plana: devolve-se um dicionário para não misturar
+    # colunas de significados diferentes.
+    if any(isinstance(obj, pd.DataFrame) for obj in collected.values()):
+        return collected
+
     frame = pd.concat(collected.values(), axis=1)
     frame.columns = list(collected.keys())
     frame.index.name = "Date"

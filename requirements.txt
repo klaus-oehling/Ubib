@@ -8,6 +8,7 @@ beautifulsoup4>=4.11
 lxml>=4.9
 python-dateutil>=2.8
 tomli>=2.0; python_version < "3.11"
+polars>=0.20          # fast fixed-width microdata reading (falls back to pandas)
 
 # Optional, install only if you use these sources:
 #   pip install "xbbg>=0.7" narwhals      # Bloomberg

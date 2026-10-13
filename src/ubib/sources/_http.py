@@ -52,3 +52,26 @@ def post(url: str, *, verify: bool = True, timeout: int = DEFAULT_TIMEOUT, **kwa
     response = _SESSION.post(url, verify=verify, timeout=timeout, **kwargs)
     response.raise_for_status()
     return response
+
+
+def head(url: str, *, verify: bool = True, timeout: int = DEFAULT_TIMEOUT, **kwargs):
+    """HTTP HEAD -- checks a URL exists without downloading its body."""
+    response = _SESSION.head(url, verify=verify, timeout=timeout,
+                             allow_redirects=True, **kwargs)
+    response.raise_for_status()
+    return response
+
+
+def stream(url: str, *, verify: bool = True, timeout: int = DEFAULT_TIMEOUT, **kwargs):
+    """HTTP GET with the body left unread, for streaming large downloads.
+
+    Use as a context manager and copy from ``response.raw`` so that a
+    multi-hundred-megabyte file never lands in memory::
+
+        with _http.stream(url) as response:
+            shutil.copyfileobj(response.raw, destino, 4 * 1024 * 1024)
+    """
+    response = _SESSION.get(url, verify=verify, timeout=timeout, stream=True, **kwargs)
+    response.raise_for_status()
+    response.raw.decode_content = True
+    return response

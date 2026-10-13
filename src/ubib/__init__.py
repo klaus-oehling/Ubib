@@ -16,6 +16,15 @@ paths and keys.
 from __future__ import annotations
 
 from .api import available_series, available_sources, info, load, update
+from .microdata import (
+    available_microdata,
+    check_microdata_layout,
+    microdata,
+    microdata_dir,
+    microdata_files,
+    microdata_variables,
+    read_microdata,
+)
 from .config import (
     API_KEY_NAMES,
     CREDENTIAL_NAMES,
@@ -33,6 +42,13 @@ __all__ = [
     "info",
     "available_series",
     "available_sources",
+    "microdata",
+    "microdata_files",
+    "microdata_variables",
+    "read_microdata",
+    "check_microdata_layout",
+    "available_microdata",
+    "microdata_dir",
     "define_config",
     "get_config",
     "template_text",
